@@ -16,6 +16,15 @@ PARTY_COLORS = {
     "Linke": "#f8f",
     "NPD": "#f80",
     "SPD": "#f88",
+
+    "Die Partei": "#444",
+    "MLPD": "#f88",
+    "Piraten": "#ff8", #?
+    "ÖDP": "#8f8",
+    "V-Partei": "#8f8",
+    "Gesundheit": "#8f8",
+    "Tierschutzpartei": "#8f8",
+    "Freie Wähler": "#88f",
 }
 
 def get_party_color(name):
@@ -24,9 +33,9 @@ def get_party_color(name):
 def get_embedding_color(embedding, party_names):
     emb = [(embedding[i], party_names[i][1]) for i in range(len(embedding))]
     emb = sorted(emb, key=lambda t:-t[0])[:3]
-    sum_ = sum(t[0] for t in emb)
+    sum_ = np.amax([t[0] for t in emb])
     if sum_:
-        emb = [(pow(t[0]/sum_, 8.), t[1]) for t in emb]
+        emb = [(pow(t[0]/sum_, 2.), t[1]) for t in emb]
     col = [0,0,0]
     sum_ = 0.00001
     for t in emb:
@@ -60,60 +69,73 @@ def _signed(x):
     return "+%s" % x if x > 0 else "%s" % x
 
 
-def get_party_plot(attribute, party_mapping, title):
+def get_party_plot(attribute, party_mapping, title, remove_parties=(), size_mult=1., min_displ=5.):
     party_mapping = party_mapping or {}
+    if remove_parties:
+        title += "  (ohne %s)" % "/".join(remove_parties)
 
-    wks = load_wahlkreise()
+    wks = load_wahlkreise(remove_parties=remove_parties)
     wks = {wk["wkid"]: wk for wk in wks.values() if wk.get("name")}
     party_names = calc_party_embedding(wks, attribute, party_mapping)
-    print(wks[1])
-    print(party_names)
+    print("%s %s" % (attribute, sorted(p[1] for p in party_names)))
 
-    if 1:
-        #party_names = get_party_grid("percent1")
-        #X = np.array([g for g in wks.values()], dtype="float32")
-        EMB, LABELS, COLORS, WKNAME, SIZES = [], [], [], [], []
-        for wk in wks.values():
-            embedding = wk["embedding"]
-            EMB.append(embedding)
-            results = [(party_mapping.get(r["partyname"], r["partyname"]),
-                        r[attribute],
-                        _signed(r.get(attribute+"Diff", 0)),
-                        r["absolute2"],
-                        ) for r in wk["results"]]
-            results = sorted(results, key=lambda t: -t[1])
-            if attribute=="percent1":
-                LABELS.append(", ".join("%s %s" % r[:2] for r in results if r[1] >= 5.))
-            else:
-                LABELS.append(", ".join("%s %s (%s)" % r[:3] for r in results if r[1] >= 5.))
-            WKNAME.append("%s %s" % (wk["wkid"], wk.get("name", "-")))
-            #COLORS.append(get_party_color(results[0][0]))
-            COLORS.append(get_embedding_color(embedding, party_names))
-            SIZES.append(results[0][3]/10000.)
+    #party_names = get_party_grid("percent1")
+    #X = np.array([g for g in wks.values()], dtype="float32")
+    EMB, LABELS, COLORS, WKNAME, SIZES = [], [], [], [], []
+    for wk in wks.values():
+        embedding = wk["embedding"]
+        EMB.append(embedding)
+        results = [(party_mapping.get(r["partyname"], r["partyname"]),
+                    r[attribute],
+                    _signed(r.get(attribute+"Diff", 0)),
+                    r["absolute2"],
+                    ) for r in wk["results"]]
+        results = sorted(results, key=lambda r: -r[1])
+        def _check(res):
+            return res[1] >= min_displ and (attribute!="percent2Diff" or res[1] != 0)
+        if attribute=="percent2":
+            LABELS.append(", ".join("%s %s (%s)" % r[:3] for r in results if _check(r)))
+        elif attribute=="percent2Diff":
+            LABELS.append(", ".join("%s %s" % (r[0], _signed(r[1])) for r in results if _check(r)))
+        else:
+            LABELS.append(", ".join("%s %s" % r[:2] for r in results if _check(r)))
 
-        pca = PCA(n_components=2, svd_solver='full')
-        X = pca.fit(EMB).transform(EMB)
+        WKNAME.append("%s %s" % (wk["wkid"], wk.get("name", "-")))
+        #COLORS.append(get_party_color(results[0][0]))
+        COLORS.append(get_embedding_color(embedding, party_names))
+        SIZES.append(max(3., min(20., results[0][3]/8000.*size_mult)))
 
-        markup = get_scatter_plot_markup(
-            {
-                "x": [x[0] for x in X],
-                "y": [x[1] for x in X],
-                "size": SIZES,
-                "color": COLORS,
-                "Parteien": LABELS,
-                "Wahlkreis": WKNAME,
-            },
-            title=title,
-            width=600, height=600
-        )
-        return markup
+    pca = PCA(n_components=2, svd_solver='full')
+    X = pca.fit(EMB).transform(EMB)
+
+    markup = get_scatter_plot_markup(
+        {
+            "x": [x[0] for x in X],
+            "y": [x[1] for x in X],
+            "size": SIZES,
+            "color": COLORS,
+            "Parteien": LABELS,
+            "Wahlkreis": WKNAME,
+        },
+        title=title,
+        width=600, height=600
+    )
+    return markup
 
 if 1:
+    REMOVE_PARTIES1 = sorted(("CDU", "CSU", "SPD"))
+    REMOVE_PARTIES2 = sorted(("CDU", "CSU", "SPD", "FDP", "AfD", "Linke", "Grüne"))
     render_template("./website/index.template", "./index.html", {
         "plot1": get_party_plot("percent1", {}, "Erststimmen % pro Wahlkreis"),
         "plot2": get_party_plot("percent2", {}, "Zweitstimmen % pro Wahlkreis"),
         "plot3": get_party_plot("percent1", CDU_CSU_MAPPING, "Erststimmen % pro Wahlkreis (CDU/CSU zusammen)"),
         "plot4": get_party_plot("percent2", CDU_CSU_MAPPING, "Zweitstimmen % pro Wahlkreis (CDU/CSU zusammen)"),
+        "plot5": get_party_plot("percent1", {}, "Erststimmen % pro Wahlkreis", REMOVE_PARTIES1, 2., 0.1),
+        "plot6": get_party_plot("percent2", {}, "Zweitstimmen % pro Wahlkreis", REMOVE_PARTIES1, 2., 0.1),
+        "plot7": get_party_plot("percent1", {}, "Erststimmen % pro Wahlkreis", REMOVE_PARTIES2, 17., 0.1),
+        "plot8": get_party_plot("percent2", {}, "Zweitstimmen % pro Wahlkreis", REMOVE_PARTIES2, 17., 0.1),
+        "plot9": get_party_plot("percent2Diff", {}, "Zuwachs an Zweitstimmen % pro Wahlkreis", (), 2., -100.),
+        "plot10": get_party_plot("percent2Diff", {}, "Zuwachs an Zweitstimmen % pro Wahlkreis", ("AfD", "FDP"), 2., -100.),
     })
 
 

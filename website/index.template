@@ -8,7 +8,17 @@
     <body>
 
     <h3>Principal Component Analysis (<a href="https://de.wikipedia.org/wiki/Hauptkomponentenanalyse">PCA</a>) für die Ergebnisse der Bundestagswahl 2017 pro Wahlkreis</h3>
-    <p>Quelle: <a href="https://www.welt.de/politik/deutschland/article168883713">welt.de</a></p>
+
+    <p>Jeder Punkt stellt einen Wahlkreis dar. Wahlkreise mit ähnlichen Wahlergebnissen liegen nah beieinander.
+    Absolute Positionen sind hier relativ unwichtig.</p>
+
+    <p>Der <i>Parteienvektor</i> aller wählbaren Parteien wird auf 2 Dimensionen reduziert (mittels 2-Komponenten PCA).
+    Dieser Vektor enthält pro Wahlkreis die prozentualen Stimmen für jede Partei (insgesammt 42).
+    Die PCA findet eine lineare Transformation von 42 auf 2 Dimensionen, die möglichst große Aussagekraft über den
+    Wahlkreis beibehält.</p>
+
+    <p>Datenquelle: <a href="https://www.welt.de/politik/deutschland/article168883713">welt.de</a>
+    | Code: <a href="https://github.com/defgsus/wahl17">github.com</a>
 
     <table>
         <tr>
@@ -18,6 +28,18 @@
         <tr>
             <td>{{ plot3 }}</td>
             <td>{{ plot4 }}</td>
+        </tr>
+        <tr>
+            <td>{{ plot5 }}</td>
+            <td>{{ plot6 }}</td>
+        </tr>
+        <tr>
+            <td>{{ plot7 }}</td>
+            <td>{{ plot8 }}</td>
+        </tr>
+        <tr>
+            <td>{{ plot9 }}</td>
+            <td>{{ plot10 }}</td>
         </tr>
     </table>
 

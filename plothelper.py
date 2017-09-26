@@ -22,7 +22,6 @@ def test_plot():
         x_range=(0, 10),
 
     )
-
     plot.scatter(x=[1,2,3], y=[4,3,2])#, size="size", color="color")
     plot.line([0,1], [3,2])
     return "\n".join(components(plot))
@@ -39,12 +38,10 @@ def get_scatter_plot_markup(data, width=400, height=400, title=None):
 
     plot = figure(
         width=width, height=height,
-        tools=["pan", "tap", "wheel_zoom", "box_zoom", "reset", "save", hover],
+        tools=["pan", "wheel_zoom", "reset", "save", hover],
         title=title,
-        #x_axis_label="average refund % per children",
+        #x_axis_label="",
         #x_axis_type="log",
-        #y_axis_label="average sales per children",
-        #y_axis_type="log",
     )
     #plot.left[0].formatter.use_scientific = False
 

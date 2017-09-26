@@ -18,7 +18,7 @@ def load_area_data():
         return json.load(f)
 
 
-def load_wahlkreise():
+def load_wahlkreise(remove_parties=()):
     """Returns a dict with wkid -> Wahlkreis-object"""
     wks = dict()
     for i in range(1, 917):
@@ -33,12 +33,22 @@ def load_wahlkreise():
                     _convert(res, float, ('percent1', 'percent2', 'percent2Pre', 'percent2Diff'))
                     _convert(res, int, ('absolute1', 'absolute2', 'seats'))
 
+                if remove_parties:
+                    res_org = wk["results"]
+                    res = []
+                    for r in res_org:
+                        if r["partyname"] not in remove_parties:
+                            res.append(r)
+                    wk["results"] = res
+
                 wks[wk["wkid"]] = wk
         except FileNotFoundError:
             pass
     areas = load_area_data()
     for info in areas["states"]:
-        wks[int(info["wkid"])]["name"] = info["nameLong"]
+        wkid = int(info["wkid"])
+        if wkid in wks:
+            wks[wkid]["name"] = info["nameLong"]
     return wks
 
 
