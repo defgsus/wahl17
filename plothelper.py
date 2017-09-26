@@ -3,6 +3,17 @@ from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.embed import components
 from bokeh.models import NumeralTickFormatter
 
+
+def render_template(in_filename, out_filename, context):
+    with open(in_filename, "r") as f:
+        html = f.read()
+    for key in context:
+        html = html.replace("{{ %s }}" % key, context[key])
+    with open(out_filename, "w") as f:
+        f.write(html)
+    return html
+
+
 def test_plot():
     plot = figure(
         width=300, height=300,
@@ -17,16 +28,14 @@ def test_plot():
     return "\n".join(components(plot))
 
 
-def get_scatter_plot_markup(X, Y, width=400, height=400, title=None):
+def get_scatter_plot_markup(data, width=400, height=400, title=None):
 
-    hover = HoverTool(
-        tooltips=[
-            ("X", "@x"),
-            ("Y", "@y"),
-            #("average sales", "@sales{0}"),
-            #("average refunds %", "@refundsp{0.000}"),
-        ]
-    )
+    tooltips = [("X", "@x"), ("Y", "@y")]
+    for key in data:
+        if key not in ("x", "y", "color"):
+            tooltips.append((key, "@%s" % key))
+
+    hover = HoverTool(tooltips=tooltips)
 
     plot = figure(
         width=width, height=height,
@@ -39,11 +48,12 @@ def get_scatter_plot_markup(X, Y, width=400, height=400, title=None):
     )
     #plot.left[0].formatter.use_scientific = False
 
-    source = ColumnDataSource(data = {
-        "x": X,
-        "y": Y,
-    })
+    source = ColumnDataSource(data=data)
 
-    plot.scatter(source=source, x="x", y="y")#, size="size", color="color")
+    params = dict(source=source, x="x", y="y")
+    for key in ("color", "size"):
+        if key in data:
+            params[key] = key
+    plot.scatter(**params)
 
     return "\n".join(components(plot))
