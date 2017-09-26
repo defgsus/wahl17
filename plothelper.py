@@ -29,10 +29,10 @@ def test_plot():
 
 
 def get_scatter_plot_markup(data, width=400, height=400, title=None):
-
-    tooltips = [("X", "@x"), ("Y", "@y")]
+    DRAW_PARAMS = ("x", "y", "color", "size")
+    tooltips = []
     for key in data:
-        if key not in ("x", "y", "color"):
+        if key not in DRAW_PARAMS:
             tooltips.append((key, "@%s" % key))
 
     hover = HoverTool(tooltips=tooltips)
@@ -50,8 +50,8 @@ def get_scatter_plot_markup(data, width=400, height=400, title=None):
 
     source = ColumnDataSource(data=data)
 
-    params = dict(source=source, x="x", y="y")
-    for key in ("color", "size"):
+    params = dict(source=source)
+    for key in DRAW_PARAMS:
         if key in data:
             params[key] = key
     plot.scatter(**params)

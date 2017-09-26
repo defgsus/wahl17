@@ -1,3 +1,5 @@
+import math
+
 from sklearn.decomposition import PCA
 import numpy as np
 
@@ -70,18 +72,24 @@ def get_party_plot(attribute, party_mapping, title):
     if 1:
         #party_names = get_party_grid("percent1")
         #X = np.array([g for g in wks.values()], dtype="float32")
-        EMB, LABELS, COLORS, WKNAME = [], [], [], []
+        EMB, LABELS, COLORS, WKNAME, SIZES = [], [], [], [], []
         for wk in wks.values():
             embedding = wk["embedding"]
             EMB.append(embedding)
-            results = sorted(((party_mapping.get(r["partyname"], r["partyname"]),
-                               r[attribute],
-                               _signed(r.get(attribute+"Diff", 0))) for r in wk["results"]),
-                             key=lambda t: -t[1])
-            LABELS.append(", ".join("%s %s (%s)" % r for r in results if r[1] >= 5.))
+            results = [(party_mapping.get(r["partyname"], r["partyname"]),
+                        r[attribute],
+                        _signed(r.get(attribute+"Diff", 0)),
+                        r["absolute2"],
+                        ) for r in wk["results"]]
+            results = sorted(results, key=lambda t: -t[1])
+            if attribute=="percent1":
+                LABELS.append(", ".join("%s %s" % r[:2] for r in results if r[1] >= 5.))
+            else:
+                LABELS.append(", ".join("%s %s (%s)" % r[:3] for r in results if r[1] >= 5.))
             WKNAME.append("%s %s" % (wk["wkid"], wk.get("name", "-")))
             #COLORS.append(get_party_color(results[0][0]))
             COLORS.append(get_embedding_color(embedding, party_names))
+            SIZES.append(results[0][3]/10000.)
 
         pca = PCA(n_components=2, svd_solver='full')
         X = pca.fit(EMB).transform(EMB)
@@ -90,8 +98,9 @@ def get_party_plot(attribute, party_mapping, title):
             {
                 "x": [x[0] for x in X],
                 "y": [x[1] for x in X],
+                "size": SIZES,
                 "color": COLORS,
-                "Partei": LABELS,
+                "Parteien": LABELS,
                 "Wahlkreis": WKNAME,
             },
             title=title,
@@ -102,8 +111,8 @@ def get_party_plot(attribute, party_mapping, title):
 if 1:
     render_template("./website/index.template", "./index.html", {
         "plot1": get_party_plot("percent1", {}, "Erststimmen % pro Wahlkreis"),
-        "plot2": get_party_plot("percent1", CDU_CSU_MAPPING, "Erststimmen % pro Wahlkreis (CDU/CSU zusammen)"),
-        "plot3": get_party_plot("percent2", {}, "Zweitstimmen % pro Wahlkreis"),
+        "plot2": get_party_plot("percent2", {}, "Zweitstimmen % pro Wahlkreis"),
+        "plot3": get_party_plot("percent1", CDU_CSU_MAPPING, "Erststimmen % pro Wahlkreis (CDU/CSU zusammen)"),
         "plot4": get_party_plot("percent2", CDU_CSU_MAPPING, "Zweitstimmen % pro Wahlkreis (CDU/CSU zusammen)"),
     })
 
