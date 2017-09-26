@@ -6,7 +6,7 @@ Online hier: https://defgsus.github.io/wahl17/
 
 ### selber experimentieren
 
-- getestet unter debian (siehe requirements.txt für nötige Packete)
+- getestet unter debian (siehe requirements.txt für nötige Pakete)
 - virtualenv erzeugen mit **python 3.4+**, dann
 ```bash
 pip install -r requirements.txt
