@@ -69,7 +69,7 @@ if 1:
         },
         width=600, height=600
     )
-    render_template("./website/index.template", "./website/index.html", {
+    render_template("./website/index.template", "./index.html", {
         "plot": markup,
     })
 
