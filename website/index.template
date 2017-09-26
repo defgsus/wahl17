@@ -10,7 +10,16 @@
     <h3>Principal Component Analysis (<a href="https://de.wikipedia.org/wiki/Hauptkomponentenanalyse">PCA</a>) für die Ergebnisse der Bundestagswahl 2017 pro Wahlkreis</h3>
     <p>Quelle: <a href="https://www.welt.de/politik/deutschland/article168883713">welt.de</a></p>
 
-    {{ plot }}
+    <table>
+        <tr>
+            <td>{{ plot1 }}</td>
+            <td>{{ plot2 }}</td>
+        </tr>
+        <tr>
+            <td>{{ plot3 }}</td>
+            <td>{{ plot4 }}</td>
+        </tr>
+    </table>
 
     </body>
 </html>
