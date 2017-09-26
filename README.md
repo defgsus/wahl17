@@ -13,3 +13,6 @@ pip install -r requirements.txt
 python data.py
 python make_website.py
 ```
+
+`data.py` holt die json Daten von der [Welt.de - app](https://www.welt.de/politik/deutschland/article168883713).
+Die Daten liegen hier auch hier im repo unter `./welt.de/` (Stand 25.Sep.2017).
