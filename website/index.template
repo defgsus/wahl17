@@ -1,0 +1,13 @@
+<html>
+    <meta charset="utf-8">
+    <head>
+        <link href="style.css" rel="stylesheet" type="text/css">
+        <link href="bokeh-0.12.9.min.css" rel="stylesheet" type="text/css">
+        <script src="bokeh-0.12.9.min.js"></script>
+    </head>
+    <body>
+
+    {{ plot }}
+
+    </body>
+</html>

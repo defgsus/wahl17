@@ -1,11 +1,29 @@
-from data import *
+from data import load_wahlkreise
+from plothelper import get_scatter_plot_markup, test_plot
+
+
+def render_template(in_filename, out_filename, context):
+    with open(in_filename, "r") as f:
+        html = f.read()
+    for key in context:
+        html = html.replace("{{ %s }}" % key, context[key])
+    with open(out_filename, "w") as f:
+        f.write(html)
+    return html
 
 
 #areas = load_area_data()
 #print(areas["states"][0])
 
-wks = load_wahlkreise()
-print(wks[1])
+#wks = load_wahlkreise()
+#print(wks[1])
+
+
+markup = get_scatter_plot_markup([1,2,3], [4,5,3])
+render_template("./website/index.template", "./website/index.html", {
+    "plot": markup,
+})
+
 
 BTW_FEED = {"wahlkreisname": "Flensburg – Schleswig",
             "bundesland": "Schleswig-Holstein",
