@@ -7,39 +7,10 @@ from matplotlib import pyplot as plt
 from sklearn import manifold
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
-
-
-ROOT = "/home/defgsus/prog/DATA/wahl17/welt.de/"
-
-def _convert(dic, Type, keys):
-    for key in keys:
-        try:
-            dic[key] = Type(dic[key])
-        except ValueError:
-            dic[key] = Type(0)
-
-def load_wks():
-    wks = dict()
-    for i in range(1, 917):
-        try:
-            with open(ROOT + "wk/wk%s.json" % i, "r") as f:
-                wk = json.load(f)
-                wk = wk["results"][0]
-
-                _convert(wk, float, ('percentTurnout', 'percentTurnoutPre', 'percentTurnoutDiff'))
-                _convert(wk, int, ('absolute1', 'absolute2', 'absoluteVoters', 'absoluteEntitled', 'countedTotal', 'type', 'wkid'))
-                for res in wk["results"]:
-                    _convert(res, float, ('percent1', 'percent2', 'percent2Pre', 'percent2Diff'))
-                    _convert(res, int, ('absolute1', 'absolute2', 'seats'))
-
-                wks[wk["wkid"]] = wk
-        except FileNotFoundError:
-            pass
-    return wks
-
+from data import load_wahlkreise
 
 def print1():
-    wks = load_wks()
+    wks = load_wahlkreise()
     for wk in sorted(wks):
         wk = wks[wk]
         print("--- %s" % wk["wkid"])
@@ -51,7 +22,7 @@ def print1():
 
 
 def get_party_grid(value_key="percent1"):
-    wks = load_wks()
+    wks = load_wahlkreise()
     party_set = set()
     for wk in wks.values():
         for r in wk["results"]:
@@ -112,7 +83,7 @@ def plot_wk_cluster():
 plot_wk_cluster()
 
 
-R = {'results': [
+EXAMPLE = {'results': [
         {
             'percentTurnoutPre': '68.2',
             'absoluteEntitled': '1765814',

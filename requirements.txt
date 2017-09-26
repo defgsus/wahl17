@@ -1,0 +1,11 @@
+#
+# tested with python 3.4+
+#
+# for debian linux install at least the following:
+#   apt-get install libpython3-dev liblapack-dev libpng12-dev libfreetype6-dev gfortran
+#
+numpy
+matplotlib
+scipy
+sklearn
+bokeh
